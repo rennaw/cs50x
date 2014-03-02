@@ -1,4 +1,9 @@
-0.  TODO
+0.  Supported colors by file format:
+    BMP:
+    -- GIF supports 256 colors 
+    JPEG
+    PNG
+
 1.  TODO
 2.  TODO
 3.  TODO
