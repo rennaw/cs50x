@@ -1,10 +1,10 @@
 /**
- * copy.c
+ * resize.c
  *
  * Computer Science 50
  * Problem Set 5
  *
- * Copies a BMP piece by piece, just because.
+ * Resizes a BMP by a factor of n
  */
        
 #include <stdio.h>
@@ -15,15 +15,16 @@
 int main(int argc, char* argv[])
 {
     // ensure proper usage
-    if (argc != 3)
+    if (argc != 4)
     {
-        printf("Usage: ./copy infile outfile\n");
+        printf("Usage: ./resize n infile outfile\n");
         return 1;
     }
 
-    // remember filenames
-    char* infile = argv[1];
-    char* outfile = argv[2];
+    // remember filenames and resize factor
+    int factor = atoi(argv[1]);
+    char* infile = argv[2];
+    char* outfile = argv[3];
 
     // open input file 
     FILE* inptr = fopen(infile, "r");
@@ -60,6 +61,13 @@ int main(int argc, char* argv[])
         return 4;
     }
 
+    // edit the bf/biSize variables for the new file
+    bf.bfSize = 54 + (bf.bfSize * factor);
+    bi.biSize = 54 + (bi.biSize * factor); 
+
+    // edit the size of new file
+    bi.biSizeImage = bi.biSizeImage * factor
+
     // write outfile's BITMAPFILEHEADER
     fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
 
@@ -69,20 +77,25 @@ int main(int argc, char* argv[])
     // determine padding for scanlines
     int padding =  (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
 
-    // iterate over infile's scanlines
-    for (int i = 0, biHeight = abs(bi.biHeight); i < biHeight; i++)
+    // iterate over infile's scanlines, rescanning from 0 to factor
+    for (int inpt_line = 0, biHeight = abs(bi.biHeight), rescan = 0;
+             inpt_line < biHeight; rescan++)
     {
         // iterate over pixels in scanline
-        for (int j = 0; j < bi.biWidth; j++)
+        for (int inpt_pixel = 0; inpt_pixel < bi.biWidth; inpt_pixel++)
         {
-            // temporary storage
-            RGBTRIPLE triple;
+             // temporary storage
+             RGBTRIPLE triple;
 
-            // read RGB triple from infile
-            fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
-
-            // write RGB triple to outfile
-            fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
+             // read RGB triple from infile
+             fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
+            
+             // write the pixel to file from 1 to factor
+             for (int repeat = 0; repeat < factor; repeat++)
+             {
+                 // write RGB triple to outfile
+                 fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
+             }
         }
 
         // skip over padding, if any
@@ -92,6 +105,16 @@ int main(int argc, char* argv[])
         for (int k = 0; k < padding; k++)
         {
             fputc(0x00, outptr);
+        }
+        // if we need to rescan, move inptr back to start of line   
+        if (rescan < factor) 
+        {
+            fseek(inptr, -bi.biWidth, SEEK_CUR);
+        }
+        // otherwise, increment inpt_line and continue into infile
+        else 
+        {
+            inpt_line++;
         }
     }
 
