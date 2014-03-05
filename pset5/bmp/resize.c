@@ -61,12 +61,18 @@ int main(int argc, char* argv[])
         return 4;
     }
 
-    // edit the bf/biSize variables for the new file
-    bf.bfSize = 54 + (bf.bfSize * factor);
-    bi.biSize = 54 + (bi.biSize * factor); 
+    // edit the bfSize variable for the new file
+    bf.bfSize = (bf.bfSize - 54) * factor;
+    bf.bfSize += 54;
+    // edit the size of new bitmap
+    bi.biSizeImage = bi.biSizeImage * factor;
 
-    // edit the size of new file
-    bi.biSizeImage = bi.biSizeImage * factor
+    // edit the size of the bitmap. Using int primatives to 
+    // avoid problems with multiplying LONG datatype 
+    int bitmapWidth = bi.biWidth;
+    int bitmapHeight = bi.biHeight;
+    bi.biWidth = bitmapWidth * factor;
+    bi.biHeight = bitmapHeight * factor;
 
     // write outfile's BITMAPFILEHEADER
     fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
