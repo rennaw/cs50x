@@ -61,18 +61,22 @@ int main(int argc, char* argv[])
         return 4;
     }
 
+    // save the infile's information so that we can refer to it later
+    BITMAPFILEHEADER infileBF = bf;
+    BITMAPINFOHEADER infileBI = bi;
+    
     // edit the bfSize variable for the new file
-    bf.bfSize = (bf.bfSize - 54) * factor;
-    bf.bfSize += 54;
-    // edit the size of new bitmap
+    // bfOffBits corresponds to the size of the headers
+    // which do not need to change with factor
+    bf.bfSize = (bf.bfSize - bf.bfOffBits) * factor;
+    bf.bfSize += bf.bfOffBits;
+
+    // edit the size,in bytes, of new bitmap
     bi.biSizeImage = bi.biSizeImage * factor;
 
-    // edit the size of the bitmap. Using int primatives to 
-    // avoid problems with multiplying LONG datatype 
-    int bitmapWidth = bi.biWidth;
-    int bitmapHeight = bi.biHeight;
-    bi.biWidth = bitmapWidth * factor;
-    bi.biHeight = bitmapHeight * factor;
+    // edit the dimentions of the bitmap
+    bi.biWidth = bi.biWidth * factor;
+    bi.biHeight = bi.biHeight * factor;
 
     // write outfile's BITMAPFILEHEADER
     fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
@@ -83,45 +87,50 @@ int main(int argc, char* argv[])
     // determine padding for scanlines
     int padding =  (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
 
+    // remember that infileBF & infileBI refer to the original file's values
+    long lineLength = infileBI.biWidth + padding;
+
     // iterate over infile's scanlines, rescanning from 0 to factor
-    for (int inpt_line = 0, biHeight = abs(bi.biHeight), rescan = 0;
-             inpt_line < biHeight; rescan++)
+    for (int line = 0, biHeight = abs(infileBI.biHeight); line < biHeight; line++)
     {
-        // iterate over pixels in scanline
-        for (int inpt_pixel = 0; inpt_pixel < bi.biWidth; inpt_pixel++)
+        for (int rescan = 0; rescan < factor; rescan++)
         {
-             // temporary storage
-             RGBTRIPLE triple;
+            // ftell returns the position of the file pointer
+            // here, we record the start of the line
+            long lineStart = ftell(inptr);
 
-             // read RGB triple from infile
-             fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
+            // iterate over pixels in scanline
+            for (int pixel = 0; pixel < infileBI.biWidth; pixel++)
+            {
+                // temporary storage
+                RGBTRIPLE triple;
+
+                // read RGB triple from infile
+                fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
+               
+                 // write the pixel to file from 1 to factor
+                for (int repeat = 0; repeat < factor; repeat++)
+                {
+                     // write RGB triple to outfile
+                    fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
+                }
+            }
+            // skip over padding in infile
+            fseek(inptr, padding, SEEK_CUR);
             
-             // write the pixel to file from 1 to factor
-             for (int repeat = 0; repeat < factor; repeat++)
-             {
-                 // write RGB triple to outfile
-                 fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
-             }
-        }
+            // record the finish of the scanline
+            long lineFinish = ftell(inptr);
 
-        // skip over padding, if any
-        fseek(inptr, padding, SEEK_CUR);
+            // add padding for outfile
+            for (int numPadChars = 0; numPadChars < padding; numPadChars++)
+            {
+                fputc(0x00, outptr);
+            }
 
-        // then add it back (to demonstrate how)
-        for (int k = 0; k < padding; k++)
-        {
-            fputc(0x00, outptr);
+            // seek to the start of the line
+            fseek(inptr, -(lineFinish - lineStart), SEEK_CUR);
         }
-        // if we need to rescan, move inptr back to start of line   
-        if (rescan < factor) 
-        {
-            fseek(inptr, -bi.biWidth, SEEK_CUR);
-        }
-        // otherwise, increment inpt_line and continue into infile
-        else 
-        {
-            inpt_line++;
-        }
+        fseek(inptr, lineLength, SEEK_CUR);
     }
 
     // close infile
