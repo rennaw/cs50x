@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
 
     // determine padding for scanlines
     int outfilePadding =  (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
-    int infilePadding = (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
+    int infilePadding = (4 - (infileBI.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
 
     long infileLineLength = infileBI.biWidth + infilePadding;
     long scanlineStart, scanlineFinish;
