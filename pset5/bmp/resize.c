@@ -85,20 +85,18 @@ int main(int argc, char* argv[])
     fwrite(&bi, sizeof(BITMAPINFOHEADER), 1, outptr);
 
     // determine padding for scanlines
-    int padding =  (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
+    int outfilePadding =  (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
+    int infilePadding = (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
 
-    // remember that infileBF & infileBI refer to the original file's values
-    long lineLength = infileBI.biWidth + padding;
+    long infileLineLength = infileBI.biWidth + infilePadding;
+    long scanlineStart, scanlineFinish;
 
     // iterate over infile's scanlines, rescanning from 0 to factor
     for (int line = 0, biHeight = abs(infileBI.biHeight); line < biHeight; line++)
     {
+        scanlineStart = ftell(inptr);
         for (int rescan = 0; rescan < factor; rescan++)
         {
-            // ftell returns the position of the file pointer
-            // here, we record the start of the line
-            long lineStart = ftell(inptr);
-
             // iterate over pixels in scanline
             for (int pixel = 0; pixel < infileBI.biWidth; pixel++)
             {
@@ -116,21 +114,23 @@ int main(int argc, char* argv[])
                 }
             }
             // skip over padding in infile
-            fseek(inptr, padding, SEEK_CUR);
+            fseek(inptr, infilePadding, SEEK_CUR);
             
             // record the finish of the scanline
-            long lineFinish = ftell(inptr);
+            scanlineFinish = ftell(inptr);
 
             // add padding for outfile
-            for (int numPadChars = 0; numPadChars < padding; numPadChars++)
+            for (int numPadChars = 0; numPadChars < outfilePadding; numPadChars++)
             {
                 fputc(0x00, outptr);
             }
 
             // seek to the start of the line
-            fseek(inptr, -(lineFinish - lineStart), SEEK_CUR);
+            fseek(inptr, scanlineStart, SEEK_SET);
         }
-        fseek(inptr, lineLength, SEEK_CUR);
+
+        // seek to the end of the scanline
+        fseek(inptr, scanlineFinish, SEEK_SET);
     }
 
     // close infile
