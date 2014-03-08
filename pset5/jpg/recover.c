@@ -16,7 +16,6 @@
 
 // prototypes
 FILE* newJPG(int num, FILE* ptr); // closes old file if there is one
-bool checkJPGsig(char* buffer); // checks to see if the block has JPEG signatures
 
 int main(int argc, char* argv[])
 {
@@ -40,6 +39,10 @@ int main(int argc, char* argv[])
     // keeping track of recovered files for naming purposes
     int numJPGs = 0;
 
+    // JPEG signatures of two varieties
+    int signature1[4] = {0xff, 0xd8, 0xff, 0xe0};
+    int signature2[4] = {0xff, 0xd8, 0xff, 0xe1};
+
     // keeping bool flag for EOF
     bool eof = false;
 
@@ -50,8 +53,26 @@ int main(int argc, char* argv[])
         if ( fread(&buffer, BLOCK, 1, raw) == 1)
         {
 
+            // check first four bytes for JPEG signature
+            bool match = false;
+            for (int i = 0; i < 4; i++)
+            {
+                if (buffer[i] == signature1[i])
+                {
+                    match = true;
+                }
+                else if (buffer[i] == signature2[i])
+                {
+                    match = true;
+                }
+                else
+                {
+                    match = false;
+                }
+            }
+            
             // if JPG signatures are in the block
-            if (checkJPGsig(buffer))
+            if (match)
             {
                 numJPGs++;
                 newJPG(numJPGs, jpg);
@@ -89,19 +110,4 @@ FILE* newJPG(int num, FILE* ptr)
     sprintf(title, "%3d.jpg", num);
     ptr = fopen(title, "a");
     return ptr;
-}
-
-bool checkJPGsig(char* bfr)
-{
-    // eq is short for equal, sig short for JPEG signature
-    bool match = false;
-    char sig1[4] = {0xff, 0xd8, 0xff, 0xe0};
-    char sig2[4] = {0xff, 0xd8, 0xff, 0xe1};
-    for (int i = 0; i < 4; i++)
-    {
-        // if buffer[i] and sig1[i] or sig2[i] match, then they are equal
-        (bfr[i] == sig1[i] || bfr[i] == sig2[i]) ? (match = true) : (match = false);
-    }
-
-    return match;
 }
