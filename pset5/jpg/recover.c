@@ -8,14 +8,12 @@
  */
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #define BLOCK 512
 #define TOTAL_JPGS 50
-
-// prototypes
-FILE* newJPG(int num, FILE* ptr); // closes old file if there is one
 
 int main(int argc, char* argv[])
 {
@@ -29,8 +27,8 @@ int main(int argc, char* argv[])
     }
     // INITIALIZING
 
-    // buffer is char because that will look at hexidecimal pairs
-    char* buffer = malloc(BLOCK);
+    // buffer stores the copy of block on the heap
+    int8_t* buffer = malloc(BLOCK);
     
     // file pointers
     FILE* raw = fopen("card.raw", "r");
@@ -39,10 +37,6 @@ int main(int argc, char* argv[])
     // keeping track of recovered files for naming purposes
     int numJPGs = 0;
 
-    // JPEG signatures of two varieties
-    int signature1[4] = {0xff, 0xd8, 0xff, 0xe0};
-    int signature2[4] = {0xff, 0xd8, 0xff, 0xe1};
-
     // keeping bool flag for EOF
     bool eof = false;
 
@@ -50,32 +44,27 @@ int main(int argc, char* argv[])
     do
     {
         // read the raw file
-        if ( fread(&buffer, BLOCK, 1, raw) == 1)
+        if ( fread(buffer, BLOCK, 1, raw) == 1)
         {
 
-            // check first four bytes for JPEG signature
-            bool match = false;
-            for (int i = 0; i < 4; i++)
-            {
-                if (buffer[i] == signature1[i])
-                {
-                    match = true;
-                }
-                else if (buffer[i] == signature2[i])
-                {
-                    match = true;
-                }
-                else
-                {
-                    match = false;
-                }
-            }
-            
             // if JPG signatures are in the block
-            if (match)
+            if (*buffer == 0xffd8ffe0 || *buffer == 0xffd8ffe1)
             {
                 numJPGs++;
-                newJPG(numJPGs, jpg);
+		
+		// if there is a file already
+		if (jpg != NULL)
+		{
+			fclose(jpg);
+		}
+
+		// create new file with numeric name		
+		char* title = malloc(sizeof(char) * 7);
+		sprintf(title, "%3d.jpg", numJPGs);
+		jpg = fopen(title, "a");
+		free(title);
+
+		// write the block to the new file
                 fwrite(&buffer, BLOCK, 1, jpg);
             }
 
@@ -85,11 +74,17 @@ int main(int argc, char* argv[])
                 fwrite(&buffer, BLOCK, 1, jpg);
             }
 
-            // skip the empty block
-            else {fseek(raw, BLOCK, SEEK_CUR);}
+            // skip empty blocks
+            else 
+            {
+                fseek(raw, BLOCK, SEEK_CUR);
+            }
         }
         // if fread was not able to return 1, we are at eof
-        else {eof = true;}
+        else 
+        {
+            eof = true;
+        }
 
     } while (!eof && numJPGs < TOTAL_JPGS);
 
@@ -100,14 +95,3 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-FILE* newJPG(int num, FILE* ptr)
-{
-    // if there was a file open already
-    if (ptr != NULL) {fclose(ptr);}
-    
-    // create file with sprintf
-    char title[7];
-    sprintf(title, "%3d.jpg", num);
-    ptr = fopen(title, "a");
-    return ptr;
-}
