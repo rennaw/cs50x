@@ -21,6 +21,11 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+    if (argv[1] < 1 || argv[1] > 100)
+    {
+        prinf("The resize number must be between 1 and 100, inclusive.");
+    }
+
     // remember filenames and resize factor
     int factor = atoi(argv[1]);
     char* infile = argv[2];
