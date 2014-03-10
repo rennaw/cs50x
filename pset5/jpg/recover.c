@@ -44,7 +44,8 @@ int main(int argc, char* argv[])
     do
     {
         // read the raw file
-        if ( fread(buffer, BLOCK, 1, raw) == 1)
+	int blocksRead = fread(buffer, BLOCK, 1, raw);
+        if (blocksRead == 1)
         {
 
             // if JPG signatures are in the block
