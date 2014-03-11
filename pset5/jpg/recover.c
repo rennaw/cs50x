@@ -22,17 +22,23 @@ int main(int argc, char* argv[])
     if (argc != 1)
     {
         printf("Usage: recover does not take any arguments\n");
-        printf("File card.raw must be in this directory.");
+        printf("File card.raw must be in this directory.\n");
         return 1;
     }
     // INITIALIZING
 
     // buffer stores the copy of block on the heap
-    int8_t* buffer = malloc(BLOCK);
+    unsigned int* buffer = malloc(BLOCK);
     
     // file pointers
     FILE* raw = fopen("card.raw", "r");
     FILE* jpg = NULL;
+
+    if (raw == NULL)
+    {
+        printf("Could not open card.raw\n");
+        return 2;
+    }
 
     // keeping track of recovered files for naming purposes
     int numJPGs = 0;
@@ -44,42 +50,42 @@ int main(int argc, char* argv[])
     do
     {
         // read the raw file
-	int blocksRead = fread(buffer, BLOCK, 1, raw);
-        if (blocksRead == 1)
-        {
-
-            // if JPG signatures are in the block
-            if (*buffer == 0xffd8ffe0 || *buffer == 0xffd8ffe1)
+            if (fread(buffer, BLOCK, 1, raw) == 1)
             {
-                numJPGs++;
-		
-		// if there is a file already
-		if (jpg != NULL)
-		{
-			fclose(jpg);
-		}
 
-		// create new file with numeric name		
-		char* title = malloc(sizeof(char) * 7);
-		sprintf(title, "%3d.jpg", numJPGs);
-		jpg = fopen(title, "a");
-		free(title);
+                // if JPG signatures are in the block
+                if (*buffer == 0xffd8ffe0 || *buffer == 0xffd8ffe1)
+                {
+                    numJPGs++;
+		    
+		            // if there is a file already
+		            if (jpg != NULL)
+		            {
+			            fclose(jpg);
+		            }
 
-		// write the block to the new file
-                fwrite(&buffer, BLOCK, 1, jpg);
-            }
+		            // create new file with numeric name		
+    		        char* title = malloc(sizeof(char) * 7);
+	    	        sprintf(title, "%3d.jpg", numJPGs);
+	    	        jpg = fopen(title, "a");
+	    	        free(title);
 
-            // if a file has been opened for jpg
-            else if (jpg != NULL)
-            {
-                fwrite(&buffer, BLOCK, 1, jpg);
-            }
+	    	        // write the block to the new file
+                    fwrite(buffer, BLOCK, 1, jpg);
+                }
 
-            // skip empty blocks
-            else 
-            {
-                fseek(raw, BLOCK, SEEK_CUR);
-            }
+                // if a file has been opened for jpg
+                else if (jpg != NULL)
+                {
+                    fwrite(&buffer, BLOCK, 1, jpg);
+                }
+
+                // skip empty blocks
+                else 
+                {
+                    fseek(raw, BLOCK, SEEK_CUR);
+                }
+            
         }
         // if fread was not able to return 1, we are at eof
         else 

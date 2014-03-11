@@ -17,19 +17,20 @@ int main(int argc, char* argv[])
     // ensure proper usage
     if (argc != 4)
     {
-        printf("Usage: ./resize n infile outfile\n");
+        printf("Usage: ./resize factor infile outfile\n");
         return 1;
-    }
-
-    if (argv[1] < 1 || argv[1] > 100)
-    {
-        prinf("The resize number must be between 1 and 100, inclusive.");
     }
 
     // remember filenames and resize factor
     int factor = atoi(argv[1]);
     char* infile = argv[2];
     char* outfile = argv[3];
+
+    if (factor < 1 || factor > 100)
+    {
+        printf("The resize number must be between 1 and 100, inclusive.");
+        return 2;
+    }
 
     // open input file 
     FILE* inptr = fopen(infile, "r");
