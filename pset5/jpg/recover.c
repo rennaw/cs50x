@@ -64,8 +64,8 @@ int main(int argc, char* argv[])
 		}
 
 		// create new file with numeric name		
-    		char* title = malloc(sizeof(char) * 7);
-	    	sprintf(title, "%3d.jpg", numJPGs);
+    		char* title = malloc(sizeof(char) * 8);
+	    	sprintf(title, "%03d.jpg", numJPGs);
 	    	jpg = fopen(title, "a");
 	    	free(title);
 
@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
             eof = true;
         }
 
-    } while (!eof && numJPGs < TOTAL_JPGS);
+    } while (!eof);
 
     // finishing
     free(buffer);
