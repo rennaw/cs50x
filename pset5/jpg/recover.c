@@ -50,42 +50,38 @@ int main(int argc, char* argv[])
     do
     {
         // read the raw file
-            if (fread(buffer, BLOCK, 1, raw) == 1)
+        if (fread(buffer, BLOCK, 1, raw) == 1)
+        {
+
+            // if JPG signatures are in the block
+            if (*buffer == 0xe0ffd8ff || *buffer == 0xe1ffd8ff)
             {
-
-                // if JPG signatures are in the block
-                if (*buffer == 0xffd8ffe0 || *buffer == 0xffd8ffe1)
-                {
-                    numJPGs++;
 		    
-		            // if there is a file already
-		            if (jpg != NULL)
-		            {
-			            fclose(jpg);
-		            }
+                 // if there is a file already
+		if (jpg != NULL)
+		{
+		    fclose(jpg);
+		}
 
-		            // create new file with numeric name		
-    		        char* title = malloc(sizeof(char) * 7);
-	    	        sprintf(title, "%3d.jpg", numJPGs);
-	    	        jpg = fopen(title, "a");
-	    	        free(title);
+		// create new file with numeric name		
+    		char* title = malloc(sizeof(char) * 8);
+	    	sprintf(title, "%03d.jpg", numJPGs);
+	    	jpg = fopen(title, "a");
+	    	free(title);
 
-	    	        // write the block to the new file
-                    fwrite(buffer, BLOCK, 1, jpg);
-                }
+	    	// write the block to the new file
+                fwrite(buffer, BLOCK, 1, jpg);
+                
+                // increment number of JPG files
+                numJPGs++;
+            }
 
-                // if a file has been opened for jpg
-                else if (jpg != NULL)
-                {
-                    fwrite(&buffer, BLOCK, 1, jpg);
-                }
+            // if a file has been opened for jpg
+            else if (jpg != NULL)
+            {
+                fwrite(buffer, BLOCK, 1, jpg);
+            }
 
-                // skip empty blocks
-                else 
-                {
-                    fseek(raw, BLOCK, SEEK_CUR);
-                }
-            
         }
         // if fread was not able to return 1, we are at eof
         else 
@@ -93,7 +89,7 @@ int main(int argc, char* argv[])
             eof = true;
         }
 
-    } while (!eof && numJPGs < TOTAL_JPGS);
+    } while (!eof);
 
     // finishing
     free(buffer);
