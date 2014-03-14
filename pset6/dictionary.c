@@ -16,7 +16,10 @@
  */
 bool check(const char* word)
 {
-    // TODO
+    // traverse the trie, checking each letter
+
+    // if the word is in the dictionary, return true
+
     return false;
 }
 
@@ -25,7 +28,20 @@ bool check(const char* word)
  */
 bool load(const char* dictionary)
 {
-    // TODO
+ 
+    // for each dictionary word, iterate through the trie
+    for 
+
+    // each element in children corresponds to a different letter
+
+    // check the value at children[i]
+
+    // if NULL, malloc new node, have children[i] point to it
+
+    // if not NULL, move to new node and continue
+
+    // if at end of word, is_word = true, and call addword(dict_size)
+
     return false;
 }
 
@@ -34,7 +50,7 @@ bool load(const char* dictionary)
  */
 unsigned int size(void)
 {
-    // TODO
+    // access global dict_size and reports it
     return 0;
 }
 
@@ -43,6 +59,8 @@ unsigned int size(void)
  */
 bool unload(void)
 {
-    // TODO
+    // free the nodes from the bottom to the top, using recursion
     return false;
 }
+
+addword
