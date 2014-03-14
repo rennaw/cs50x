@@ -28,7 +28,9 @@ bool check(const char* word)
  */
 bool load(const char* dictionary)
 {
- 
+    // load the word of the dictionary into memory, within the limit
+    char* word[LENGTH];
+    fscanf(""
     // for each dictionary word, iterate through the trie
     for 
 
@@ -50,8 +52,14 @@ bool load(const char* dictionary)
  */
 unsigned int size(void)
 {
-    // access global dict_size and reports it
-    return 0;
+    // access trie_size node and reports it
+    if (root[0]->child[0]->trie_size != NULL)
+    {
+        unsigned int size = root[0]->child[0]->trie_size;
+        return size;
+    }
+    else
+        return 0;
 }
 
 /**
