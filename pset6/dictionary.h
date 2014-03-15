@@ -16,6 +16,10 @@
 // (e.g., pneumonoultramicroscopicsilicovolcanoconiosis)
 #define LENGTH 45
 
+// number of characters that we will map to
+// apostrophe is placed after 'z'
+#define ALPHABET 27
+
 /**
  * Returns true if word is in dictionary else false.
  */

@@ -14,22 +14,46 @@
 // two apostrophies, since they don't occur together in english words)
 // This is what the size() function will refer to in dictionary.c
 
-// In this implementation, the apostrophe will be mapped to trie_node[0],
-// 'a' will be mapped to trie_node[1], and so on.
+// In this implementation, the apostrophe will be mapped to trie_node[27]
+
+
 
 typedef struct trie_node
 {
     bool is_word = false;
-
-    // \' is children[0], 'a' is children[1]
-    struct trie_node* children[27];
+    struct trie_node* children[ALPHABET];
 }
 trie_node;
+
+typedef struct trie_root
+{
+    int trie_size;
+    trie_node* children[ALPHABET];
+}
+trie_root;
 
 trie_node* create_node(trie_node* parent, int index)
 {
     // take the index of the parent and create
     // a new child node with a pointer to it
+    parent->children[index] = malloc(sizeof(trie_node));
+
+    // initialize all of new node's pointers to NULL
+    for (i = 0; i < ALPHABET; i++)
+    {
+        parent->children[index]->children[i] = NULL;
+    }
+}
+
+trie_root* create_root(void)
+{
+    trie_root* root = malloc(sizeof(trie_root));
+    for (i = 0; i < ALPHABET; i++)
+    {
+        root->children[i] = NULL;
+    }
+    root->trie_size = 0;
+    return root;
 }
 
 trie_node* next_node(trie_node* parent, int index)

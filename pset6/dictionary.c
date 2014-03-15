@@ -28,11 +28,29 @@ bool check(const char* word)
  */
 bool load(const char* dictionary)
 {
-    // load the word of the dictionary into memory, within the limit
-    char* word[LENGTH];
-    fscanf(""
-    // for each dictionary word, iterate through the trie
-    for 
+    // first,create root node in dictionary, then create a cursor
+    trie_root* root = create_root();
+    
+    // now open the dictionary file and word buffer and word count
+    FILE* dict_fp = fopen(dictionary, "r");
+    char word[LENGTH+1];
+    int wcount = 0, windex = 0;
+
+    // for each dictionary char, iterate through the trie
+    for (int c = fgetc(dict_fp); c != EOF; c = fgetc(dict_fp))
+    {
+        
+        if (isalpha(c) || (c == '\'' && windex > 0))
+        {
+            if
+            int index = islower(c) - 'a'
+            trie_node* child = create_node(parent, index); 
+        }
+        else if (c == '\n')
+        {
+            wcount++;
+        }
+    }
 
     // each element in children corresponds to a different letter
 
@@ -71,4 +89,3 @@ bool unload(void)
     return false;
 }
 
-addword
