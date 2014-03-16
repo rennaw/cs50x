@@ -11,9 +11,13 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "dictionary.h"
 #include "trie.h"
+
+trie* dict;
+trie_node* cursor, root;
 
 /**
  * Returns true if word is in dictionary else false.
@@ -21,9 +25,24 @@
 bool check(const char* word)
 {
     // traverse the trie, checking each letter
+    cursor = &root;
+    for (int i = 0, n = strlen(word); i < n; i++)
+    {
+        if (cursor->children[i] != NULL)
+        {
+            cursor = next_node(&root, i);
+        }
+        else
+        {
+            return false;
+        }
+    }
     
-    // if the word is in the dictionary, return true
-
+    // if word is dictionary, return true
+    if (cursor->is_word == true)
+    {
+        return true;
+    } 
     return false;
 }
 
@@ -33,12 +52,12 @@ bool check(const char* word)
 bool load(const char* dictionary)
 {
     // first, create trie container
-    trie* dict = malloc(sizeof(trie));
+    dict = malloc(sizeof(trie));
     trie_node* root = malloc(sizeof(trie_node));
     dict->root_ptr = root;
 
-    trie_node* cursor = root;
-
+    cursor = root;
+    
     // now open the dictionary file and word buffer and word count
     FILE* dict_fp = fopen(dictionary, "r");
     if (dict_fp == NULL) 
@@ -78,7 +97,7 @@ bool load(const char* dictionary)
  */
 unsigned int size(void)
 {
-   return 0;
+   return dict->size;
 }
 
 /**
@@ -87,6 +106,15 @@ unsigned int size(void)
 bool unload(void)
 {
     // free the nodes from the bottom to the top, using recursion
-    return false;
+    remove_branch(&root);
+    if (dict->root_ptr == NULL)
+    {
+        free(&dict);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 

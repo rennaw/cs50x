@@ -39,6 +39,14 @@ void remove_branch(trie_node* node)
     // it and all of it's children from the trie.
     // if this method is called on the root,
     // the entire thing will be removed from memory.
+    for (int i = 0; i < 27; i++)
+    {
+        if (node->children[i] != NULL)
+        {
+            remove_branch(node->children[i]);
+        }
+        free(node);
+    }
     return;
 }
 
