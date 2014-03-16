@@ -21,7 +21,7 @@
 bool check(const char* word)
 {
     // traverse the trie, checking each letter
-
+    
     // if the word is in the dictionary, return true
 
     return false;
@@ -41,15 +41,11 @@ bool load(const char* dictionary)
 
     // now open the dictionary file and word buffer and word count
     FILE* dict_fp = fopen(dictionary, "r");
-    if (dict_fp != NULL) 
+    if (dict_fp == NULL) 
     {
-        printf("Dictionary file opened.");
+        return false;
     }
-    else
-    {
-        return 1;
-    }
-
+    
     // for each dictionary char, iterate through the trie
     for (int c = fgetc(dict_fp); c != EOF; c = fgetc(dict_fp))
     {
