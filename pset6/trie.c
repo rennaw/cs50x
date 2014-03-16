@@ -16,21 +16,10 @@
 
 // In this implementation, the apostrophe will be mapped to trie_node[27]
 
+#include <stdbool.h>
+#include <stdlib.h>
 
-
-typedef struct trie_node
-{
-    bool is_word = false;
-    struct trie_node* children[ALPHABET];
-}
-trie_node;
-
-typedef struct trie_root
-{
-    int trie_size;
-    trie_node* children[ALPHABET];
-}
-trie_root;
+#include "trie.h"
 
 trie_node* create_node(trie_node* parent, int index)
 {
@@ -39,28 +28,27 @@ trie_node* create_node(trie_node* parent, int index)
     parent->children[index] = malloc(sizeof(trie_node));
 
     // initialize all of new node's pointers to NULL
-    for (i = 0; i < ALPHABET; i++)
+    for (int i = 0; i < 27; i++)
     {
         parent->children[index]->children[i] = NULL;
     }
-}
-
-trie_root* create_root(void)
-{
-    trie_root* root = malloc(sizeof(trie_root));
-    for (i = 0; i < ALPHABET; i++)
-    {
-        root->children[i] = NULL;
-    }
-    root->trie_size = 0;
-    return root;
+    parent->children[index]->is_word = false;
+    return parent->children[index];
 }
 
 trie_node* next_node(trie_node* parent, int index)
 {
     // take the index of the parent and jump
     // to the child node
-    trie_node* next = parent[index]
+    if (parent->children[index] != NULL)
+    {
+        trie_node* next = parent->children[index];
+        return next;
+    }
+    else
+    {
+        return NULL;
+    }
 }
 
 void remove_branch(trie_node* node)
@@ -69,15 +57,6 @@ void remove_branch(trie_node* node)
     // it and all of it's children from the trie.
     // if this method is called on the root,
     // the entire thing will be removed from memory.
-}
-
-void set_trie_size(trie_node* root)
-{
-    // this will create a special 'trie_size' node
-    // that is linked in this fashion:
-    // root[0]->child[0]->trie_size
-    trie_node* child = create_node(root, 0);
-    int* trie_size = malloc(sizeof(int));
-    root->child[0] = trie_size;
+    return;
 }
 
