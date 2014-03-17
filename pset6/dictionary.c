@@ -26,11 +26,15 @@ bool check(const char* word)
 {
     // traverse the trie, checking each letter
     cursor = dict->root;
-    for (int i = 0, n = strlen(word); i < n; i++)
+    for (int i = 0, c = 0, n = strlen(word); i < n; i++)
     {
-        if (cursor->children[i] != NULL)
+        // check if char is alpha or apostrophe
+        (isalpha(word[i])) ? (c = tolower(word[i]) - 'a') : (c = 27);
+        
+        // check the letter's pointer
+        if (cursor->children[c] != NULL)
         {
-            cursor = next_node(cursor, i);
+            cursor = next_node(cursor, c);
         }
         else
         {
