@@ -45,8 +45,8 @@ void remove_branch(trie_node* node)
         {
             remove_branch(node->children[i]);
         }
-        free(node);
     }
+    free(node);
     return;
 }
 

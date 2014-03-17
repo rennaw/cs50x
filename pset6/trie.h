@@ -15,7 +15,7 @@ trie_node;
 
 typedef struct trie
 {
-    trie_node* root_ptr;
+    trie_node* root;
     int size;
 } 
 trie;
