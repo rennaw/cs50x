@@ -29,7 +29,7 @@ bool check(const char* word)
     for (int i = 0, c = 0, n = strlen(word); i < n; i++)
     {
         // check if char is alpha or apostrophe
-        (isalpha(word[i])) ? (c = tolower(word[i]) - 'a') : (c = 27);
+        (isalpha(word[i])) ? (c = tolower(word[i]) - 'a') : (c = 26);
         
         // check the letter's pointer
         if (cursor->children[c] != NULL)
@@ -77,7 +77,14 @@ bool load(const char* dictionary)
             if (cursor->children[index] == NULL)
             {
                 trie_node* child = create_node(cursor, index);
-                cursor = child;
+                if (child != NULL)
+                {
+                    cursor = child;
+                }
+                else
+                {
+                    return false;
+                }
             }
             else
             {
